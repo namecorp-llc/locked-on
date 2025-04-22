@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "id": "camera_lock_on",
+  "version": "${version}",
+  "name": "Camera Lock On",
+  "description": "Lock your camera on to any entity!",
+  "authors": ["Namecorp LLC"],
+  "contact": {},
+  "license": "All-Rights-Reserved",
+  "icon": "assets/lockon/icon.png",
+  "environment": "client",
+  "entrypoints": {
+    "fabric-datagen": [
+      "namecorp.camera_lock_on.client.Camera_lock_onDataGenerator"
+    ],
+    "modmenu": [
+      "namecorp.camera_lock_on.compatibility.ModMenuCompat"
+    ],
+    "client": [
+      "namecorp.camera_lock_on.client.Camera_lock_onClient"
+    ],
+    "main": [
+      "namecorp.camera_lock_on.Camera_lock_on"
+    ]
+  },
+  "mixins": [
+    "camera_lock_on.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.16.13",
+    "fabric": "*",
+    "minecraft": "1.21.1"
+  },
+  "custom": {
+    "modmenu": {
+      "links": {
+        "modmenu.modrinth": "https://discord.gg/jEGF5fb"
+      },
+      "badges": [ "client" ],
+      "update_checker": true
+    }
+  }
+}

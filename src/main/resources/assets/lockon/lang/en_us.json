@@ -1,0 +1,15 @@
+{
+  "key.lockon.lockon": "Toggle Camera Lock",
+  "category.lockon.lockon": "Locked On",
+
+  "category.lockon.configtitle": "Locked On",
+  "category.lockon.config": "Camera Shift Speed",
+  "option.lockon.camdelta": "Camera Shift Speed",
+  "option.lockon.camdeltatooltip": "How fast the camera moves to the target",
+
+  "option.lockon.showHUD": "Display Locked On HUD",
+  "option.lockon.showHUDtooltip": "If your HUD will display the info of the locked entity",
+
+  "option.lockon.showCrosshair": "Display Locked On Crosshair",
+  "option.lockon.showCrosshairtooltip": "If the locked on crosshair will display when locked"
+}
