@@ -35,6 +35,17 @@ public class LockOnEvent implements WorldRenderEvents.Last {
             if(lockedEntity != null) {
                 if(!lockedEntity.isAlive()) {
                     lockedEntity = null;
+                } else {
+                    if(!player.canSee(lockedEntity) && !player.hasPermissionLevel(2)) {
+                        if(noSightTimer > 60) {
+                            noSightTimer = 0;
+                            lockedEntity = null;
+                        } else {
+                            noSightTimer++;
+                        }
+                    } else {
+                        noSightTimer = 0;
+                    }
                 }
             }
 
