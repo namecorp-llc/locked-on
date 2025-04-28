@@ -22,6 +22,8 @@ public class Camera_lock_onClient implements ClientModInitializer {
     public static boolean showHUD = true;
     public static boolean showCrosshair = true;
 
+    public static int noSightTimer = 0;
+
     @Override
     public void onInitializeClient() {
         ClientTickEvents.END_CLIENT_TICK.register(new HudTickDeltaEvent());
