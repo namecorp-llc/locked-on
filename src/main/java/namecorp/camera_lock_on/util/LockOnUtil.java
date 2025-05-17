@@ -1,15 +1,12 @@
 package namecorp.camera_lock_on.util;
 
+import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
+import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.mob.WardenEntity;
-import net.minecraft.entity.passive.*;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
 import net.minecraft.item.SpawnEggItem;
-
-import java.util.HashMap;
-import java.util.Map;
+import net.minecraft.util.math.Vec3d;
 
 public class LockOnUtil {
     public static ItemStack getSpawnEgg(Entity entity) {
@@ -20,5 +17,4 @@ public class LockOnUtil {
             return null;
         }
     }
-
 }
