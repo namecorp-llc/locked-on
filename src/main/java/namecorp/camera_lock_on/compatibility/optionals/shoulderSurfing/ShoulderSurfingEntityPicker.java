@@ -28,7 +28,10 @@ public class ShoulderSurfingEntityPicker implements IEntityPickerAdapter {
 
     @Override
     public Rotation getRotation(ClientPlayerEntity player, Entity lockedEntity, WorldRenderContext last) {
-        return vanillaEntityPickerAdapter.getRotation(player, lockedEntity, last);
+        Rotation result = vanillaEntityPickerAdapter.getRotation(player, lockedEntity, last);
+        result.addOffset(AdditionalMods.shouderSurfing().getCameraAngleOffset());
+        
+        return result;
     }
 
     @Override

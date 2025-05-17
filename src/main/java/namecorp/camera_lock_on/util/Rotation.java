@@ -1,10 +1,12 @@
 package namecorp.camera_lock_on.util;
 
+import net.minecraft.util.math.Vec2f;
+
 public class Rotation {
     private final float currentYaw;
     private final float currentPitch;
-    private final float targetYaw;
-    private final float targetPitch;
+    private float targetYaw;
+    private float targetPitch;
     public Rotation(float currentYaw, float currentPitch, float targetYaw, float targetPitch) {
         this.currentYaw = currentYaw;
         this.currentPitch = currentPitch;
@@ -25,5 +27,9 @@ public class Rotation {
     }
     public float getTargetPitch() {
         return targetPitch;
+    }
+    public void addOffset(Vec2f cameraAngleOffset) {
+        targetYaw += cameraAngleOffset.x;
+        targetPitch += cameraAngleOffset.y;
     }
 }
