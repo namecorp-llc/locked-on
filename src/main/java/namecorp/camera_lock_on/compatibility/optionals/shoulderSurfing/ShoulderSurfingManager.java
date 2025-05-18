@@ -8,14 +8,14 @@ import com.github.exopandora.shouldersurfing.api.client.IObjectPicker;
 import com.github.exopandora.shouldersurfing.api.client.IShoulderSurfingCamera;
 import com.github.exopandora.shouldersurfing.api.client.ShoulderSurfing;
 import com.github.exopandora.shouldersurfing.api.model.PickContext;
+import com.github.exopandora.shouldersurfing.config.Config;
 
-import namecorp.camera_lock_on.compatibility.optionals.AdditionalMods;
 import namecorp.camera_lock_on.compatibility.optionals.ModManager;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.Camera;
+import net.minecraft.entity.Entity;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.Vec2f;
-import net.minecraft.util.math.Vec3d;
 
 public class ShoulderSurfingManager extends ModManager {
     public ShoulderSurfingManager() {
@@ -46,17 +46,6 @@ public class ShoulderSurfingManager extends ModManager {
 		PickContext pickContext = new PickContext.Builder(camera).build();
         return ShoulderSurfing.getInstance().getObjectPicker().pick(pickContext, interactionRange, tickDelta, MinecraftClient.getInstance().player);
 
-    }
-
-    public Vec2f getCameraAngleOffset() {
-        if (!AdditionalMods.shouderSurfing().isUsingCustomCamera()) return Vec2f.ZERO;
-        IShoulderSurfingCamera camera = ShoulderSurfing.getInstance().getCamera();
-        Vec3d offset = camera.getOffset();
-        double distance = Math.pow(camera.getCameraDistance(), 2);
-        return new Vec2f(
-            (float) -Math.toDegrees(Math.atan2(offset.z, distance)),
-            (float) -Math.toDegrees(Math.atan2(offset.y, distance))
-        );
     }
 
     public boolean setCameraAngle(float yaw, float pitch) {

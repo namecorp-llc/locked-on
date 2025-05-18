@@ -10,6 +10,8 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.hit.HitResult;
+import net.minecraft.util.math.Vec2f;
+import net.minecraft.util.math.Vec3d;
 
 public class ShoulderSurfingEntityPicker implements IEntityPickerAdapter {
     private IEntityPickerAdapter vanillaEntityPickerAdapter;
@@ -28,10 +30,7 @@ public class ShoulderSurfingEntityPicker implements IEntityPickerAdapter {
 
     @Override
     public Rotation getRotation(ClientPlayerEntity player, Entity lockedEntity, WorldRenderContext last) {
-        Rotation result = vanillaEntityPickerAdapter.getRotation(player, lockedEntity, last);
-        result.addOffset(AdditionalMods.shouderSurfing().getCameraAngleOffset());
-        
-        return result;
+        return vanillaEntityPickerAdapter.getRotation(player, lockedEntity, last);
     }
 
     @Override
