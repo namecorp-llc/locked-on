@@ -8,6 +8,7 @@ import com.github.exopandora.shouldersurfing.api.client.IShoulderSurfingCamera;
 import com.github.exopandora.shouldersurfing.api.client.ShoulderSurfing;
 import com.github.exopandora.shouldersurfing.api.model.PickContext;
 import namecorp.camera_lock_on.compatibility.optionals.ModManager;
+import namecorp.camera_lock_on.util.Vec3dSingleCache;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.Camera;
 import net.minecraft.entity.Entity;
@@ -18,6 +19,8 @@ import net.minecraft.util.math.Vec3d;
 public class ShoulderSurfingManager extends ModManager {
     private static final Vec3d dimensionX = new Vec3d(1, 0, 1);
     private static final Vec3d dimensionY = new Vec3d(0, 1, 1);
+    private final Vec3dSingleCache<Vec3d> baseAngleCache = new Vec3dSingleCache<>();
+    private final Vec3dSingleCache<Vec3dSingleCache<Vec2f>> offsetCache = new Vec3dSingleCache<>();
 
 	public ShoulderSurfingManager() {
         super("shouldersurfing");
@@ -53,20 +56,31 @@ public class ShoulderSurfingManager extends ModManager {
 
     public Vec2f getCameraAngleOffset(Entity target) {
         if (!isUsingCustomCamera() || mustIgnoreDisplacement()) return Vec2f.ZERO;
-        IShoulderSurfingCamera camera = ShoulderSurfing.getInstance().getCamera();
-        Vec3d cameraPosition = MinecraftClient.getInstance().gameRenderer.getCamera().getPos();
-        double distanceToTargetX = cameraPosition.multiply(dimensionX)
-                .squaredDistanceTo(target.getPos().multiply(dimensionX));
-        double distanceToTargetY = cameraPosition.multiply(dimensionX)
-                .squaredDistanceTo(target.getPos().multiply(dimensionY));
 
-        Vec3d offset = camera.getTargetOffset();
-        double xDiff = getAngleA(offset, Vec3d.ZERO, offset.multiply(1, 0, 0), dimensionX);
-        double yDiff = getAngleA(offset, Vec3d.ZERO, offset.multiply(1, 0, 0), dimensionY);
-        return new Vec2f(
-            (float) (-xDiff * 48 / distanceToTargetX),
-            (float) (-yDiff * 48 / distanceToTargetY)
+        Vec3d result = baseAngleCache.get(
+            ShoulderSurfing.getInstance().getCamera().getTargetOffset(),
+            offset -> new Vec3d(
+                getAngleA(offset, Vec3d.ZERO, offset.multiply(1, 0, 0), dimensionX),
+                getAngleA(offset, Vec3d.ZERO, offset.multiply(1, 0, 0), dimensionY),
+                0
+            )
         );
+
+        return offsetCache
+            .get(result, x -> new Vec3dSingleCache<Vec2f>())
+            .get(
+                MinecraftClient.getInstance().gameRenderer.getCamera().getPos(),
+                cameraPosition -> {
+                    double distanceToTargetX = cameraPosition.multiply(dimensionX)
+                            .squaredDistanceTo(target.getPos().multiply(dimensionX));
+                    double distanceToTargetY = cameraPosition.multiply(dimensionX)
+                            .squaredDistanceTo(target.getPos().multiply(dimensionY));
+                    return new Vec2f(
+                        (float) (-result.x * 48 / distanceToTargetX),
+                        (float) (-result.y * 48 / distanceToTargetY)
+                    );
+                }
+            );
     }
 
     public boolean mustIgnoreDisplacement() {
@@ -75,7 +89,7 @@ public class ShoulderSurfingManager extends ModManager {
             || shoulderSurfing.isAiming();
     }
 
-    private double getAngleA(Vec3d a, Vec3d b, Vec3d c, Vec3d dimension) {
+    private static double getAngleA(Vec3d a, Vec3d b, Vec3d c, Vec3d dimension) {
         Vec3d flattenedA = a.multiply(dimension);
         Vec3d flattenedB = b.multiply(dimension);
         Vec3d flattenedC = c.multiply(dimension);
