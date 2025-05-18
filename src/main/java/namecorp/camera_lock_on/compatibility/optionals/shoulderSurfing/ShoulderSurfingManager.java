@@ -17,6 +17,7 @@ import net.minecraft.util.math.Vec2f;
 import net.minecraft.util.math.Vec3d;
 
 public class ShoulderSurfingManager extends ModManager {
+    private static final int COMPENSATION_CONSTANT = 64;
     private static final Vec3d dimensionX = new Vec3d(1, 0, 1);
     private static final Vec3d dimensionY = new Vec3d(0, 1, 1);
     private final Vec3dSingleCache<Vec3d> baseAngleCache = new Vec3dSingleCache<>();
@@ -60,8 +61,8 @@ public class ShoulderSurfingManager extends ModManager {
         Vec3d result = baseAngleCache.get(
             ShoulderSurfing.getInstance().getCamera().getTargetOffset(),
             offset -> new Vec3d(
-                getAngleA(offset, Vec3d.ZERO, offset.multiply(1, 0, 0), dimensionX),
-                getAngleA(offset, Vec3d.ZERO, offset.multiply(1, 0, 0), dimensionY),
+                getAngleA(offset, Vec3d.ZERO, offset.multiply(1, 0, 0), dimensionX) * COMPENSATION_CONSTANT,
+                getAngleA(offset, Vec3d.ZERO, offset.multiply(1, 0, 0), dimensionY) * COMPENSATION_CONSTANT,
                 0
             )
         );
@@ -76,8 +77,8 @@ public class ShoulderSurfingManager extends ModManager {
                     double distanceToTargetY = cameraPosition.multiply(dimensionX)
                             .squaredDistanceTo(target.getPos().multiply(dimensionY));
                     return new Vec2f(
-                        (float) (-result.x * 48 / distanceToTargetX),
-                        (float) (-result.y * 48 / distanceToTargetY)
+                        (float) (-result.x / distanceToTargetX),
+                        (float) (-result.y / distanceToTargetY)
                     );
                 }
             );
@@ -102,8 +103,7 @@ public class ShoulderSurfingManager extends ModManager {
     }
 
     public boolean setCameraAngle(float yaw, float pitch) {
-        if (!isShoulderSurfingEnabled())
-            return false;
+        if (!isShoulderSurfingEnabled()) return false;
         IShoulderSurfingCamera camera = ShoulderSurfing.getInstance().getCamera();
         camera.setYRot(yaw);
         camera.setXRot(pitch);
