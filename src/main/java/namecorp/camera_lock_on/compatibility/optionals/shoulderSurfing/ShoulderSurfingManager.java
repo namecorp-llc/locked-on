@@ -3,17 +3,14 @@ package namecorp.camera_lock_on.compatibility.optionals.shoulderSurfing;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.exopandora.shouldersurfing.api.client.IObjectPicker;
+import com.github.exopandora.shouldersurfing.api.client.IShoulderSurfing;
 import com.github.exopandora.shouldersurfing.api.client.IShoulderSurfingCamera;
 import com.github.exopandora.shouldersurfing.api.client.ShoulderSurfing;
 import com.github.exopandora.shouldersurfing.api.model.PickContext;
-import namecorp.camera_lock_on.Camera_lock_on;
 import namecorp.camera_lock_on.compatibility.optionals.ModManager;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.render.Camera;
 import net.minecraft.entity.Entity;
-import net.minecraft.item.Item;
-import net.minecraft.item.RangedWeaponItem;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.Vec2f;
 import net.minecraft.util.math.Vec3d;
@@ -39,8 +36,7 @@ public class ShoulderSurfingManager extends ModManager {
 
     @Nullable
     public IObjectPicker getEntityPicker() {
-        if (!isShoulderSurfingEnabled())
-            return null;
+        if (!isShoulderSurfingEnabled()) return null;
         return ShoulderSurfing.getInstance().getObjectPicker();
     }
 
@@ -74,21 +70,9 @@ public class ShoulderSurfingManager extends ModManager {
     }
 
     public boolean mustIgnoreDisplacement() {
-        return Math.abs(ShoulderSurfing.getInstance().getCamera().getXRot()) > 45 || isPlayerAiming();
-    }
-
-    private boolean isPlayerAiming() {
-        ClientPlayerEntity player = MinecraftClient.getInstance().player;
-        if (player == null) return false;
-        
-        // Check if using an item
-        if (!player.isUsingItem()) return false;
-        
-        // Get the item being used
-        Item item = player.getActiveItem().getItem();
-        
-        // Check if it's a bow, crossbow or other aimable item
-        return item instanceof RangedWeaponItem;
+        IShoulderSurfing shoulderSurfing = ShoulderSurfing.getInstance();
+        return Math.abs(shoulderSurfing.getCamera().getXRot()) > 45
+            || shoulderSurfing.isAiming();
     }
 
     private double getAngleA(Vec3d a, Vec3d b, Vec3d c, Vec3d dimension) {
