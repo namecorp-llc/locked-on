@@ -7,6 +7,7 @@ import com.github.exopandora.shouldersurfing.api.client.IShoulderSurfing;
 import com.github.exopandora.shouldersurfing.api.plugin.IShoulderSurfingPlugin;
 import com.github.exopandora.shouldersurfing.api.plugin.IShoulderSurfingRegistrar;
 
+import namecorp.camera_lock_on.compatibility.optionals.AdditionalMods;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.util.math.Vec3d;
 
@@ -28,6 +29,9 @@ public class ShoulderSurfingPlugin implements ICameraCouplingCallback, IShoulder
 
     @Override
     public Vec3d post(IShoulderSurfing instance, Vec3d targetOffset, Vec3d defaultOffset) {
-        return lockedEntity == null ? defaultOffset : defaultOffset.multiply(0, 0, 1);
+        ShoulderSurfingManager shoulderSurfing = AdditionalMods.shoulderSurfing();
+        return lockedEntity != null && shoulderSurfing.mustIgnoreDisplacement()
+            ? defaultOffset.multiply(0, 0, 1)
+            : defaultOffset;
     }
 }

@@ -21,7 +21,7 @@ public enum AdditionalMods {
         Arrays.stream(values()).map(AdditionalMods::get).forEach(ModManager::init);
     }
 
-    public static ShoulderSurfingManager shouderSurfing() {
+    public static ShoulderSurfingManager shoulderSurfing() {
         return (ShoulderSurfingManager) SHOULDER_SURFING.get();
     }
 }

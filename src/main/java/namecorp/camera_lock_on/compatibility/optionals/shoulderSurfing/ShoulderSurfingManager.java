@@ -1,24 +1,28 @@
 package namecorp.camera_lock_on.compatibility.optionals.shoulderSurfing;
 
-import static namecorp.camera_lock_on.client.Camera_lock_onClient.cameraDelta;
-
 import org.jetbrains.annotations.Nullable;
 
 import com.github.exopandora.shouldersurfing.api.client.IObjectPicker;
 import com.github.exopandora.shouldersurfing.api.client.IShoulderSurfingCamera;
 import com.github.exopandora.shouldersurfing.api.client.ShoulderSurfing;
 import com.github.exopandora.shouldersurfing.api.model.PickContext;
-import com.github.exopandora.shouldersurfing.config.Config;
-
+import namecorp.camera_lock_on.Camera_lock_on;
 import namecorp.camera_lock_on.compatibility.optionals.ModManager;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.render.Camera;
 import net.minecraft.entity.Entity;
+import net.minecraft.item.Item;
+import net.minecraft.item.RangedWeaponItem;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.Vec2f;
+import net.minecraft.util.math.Vec3d;
 
 public class ShoulderSurfingManager extends ModManager {
-    public ShoulderSurfingManager() {
+    private static final Vec3d dimensionX = new Vec3d(1, 0, 1);
+    private static final Vec3d dimensionY = new Vec3d(0, 1, 1);
+
+	public ShoulderSurfingManager() {
         super("shouldersurfing");
     }
 
@@ -35,21 +39,73 @@ public class ShoulderSurfingManager extends ModManager {
 
     @Nullable
     public IObjectPicker getEntityPicker() {
-        if (!isShoulderSurfingEnabled()) return null;
+        if (!isShoulderSurfingEnabled())
+            return null;
         return ShoulderSurfing.getInstance().getObjectPicker();
     }
 
     @Nullable
     public HitResult pick(double interactionRange, float tickDelta) {
-        if (!isShoulderSurfingEnabled()) return null;
+        if (!isShoulderSurfingEnabled())
+            return null;
         Camera camera = MinecraftClient.getInstance().gameRenderer.getCamera();
-		PickContext pickContext = new PickContext.Builder(camera).build();
-        return ShoulderSurfing.getInstance().getObjectPicker().pick(pickContext, interactionRange, tickDelta, MinecraftClient.getInstance().player);
+        PickContext pickContext = new PickContext.Builder(camera).build();
+        return ShoulderSurfing.getInstance().getObjectPicker().pick(pickContext, interactionRange, tickDelta,
+                MinecraftClient.getInstance().player);
 
     }
 
+    public Vec2f getCameraAngleOffset(Entity target) {
+        if (!isUsingCustomCamera() || mustIgnoreDisplacement()) return Vec2f.ZERO;
+        IShoulderSurfingCamera camera = ShoulderSurfing.getInstance().getCamera();
+        Vec3d cameraPosition = MinecraftClient.getInstance().gameRenderer.getCamera().getPos();
+        double distanceToTargetX = cameraPosition.multiply(dimensionX)
+                .squaredDistanceTo(target.getPos().multiply(dimensionX));
+        double distanceToTargetY = cameraPosition.multiply(dimensionX)
+                .squaredDistanceTo(target.getPos().multiply(dimensionY));
+
+        Vec3d offset = camera.getTargetOffset();
+        double xDiff = getAngleA(offset, Vec3d.ZERO, offset.multiply(1, 0, 0), dimensionX);
+        double yDiff = getAngleA(offset, Vec3d.ZERO, offset.multiply(1, 0, 0), dimensionY);
+        return new Vec2f(
+            (float) (-xDiff * 48 / distanceToTargetX),
+            (float) (-yDiff * 48 / distanceToTargetY)
+        );
+    }
+
+    public boolean mustIgnoreDisplacement() {
+        return Math.abs(ShoulderSurfing.getInstance().getCamera().getXRot()) > 45 || isPlayerAiming();
+    }
+
+    private boolean isPlayerAiming() {
+        ClientPlayerEntity player = MinecraftClient.getInstance().player;
+        if (player == null) return false;
+        
+        // Check if using an item
+        if (!player.isUsingItem()) return false;
+        
+        // Get the item being used
+        Item item = player.getActiveItem().getItem();
+        
+        // Check if it's a bow, crossbow or other aimable item
+        return item instanceof RangedWeaponItem;
+    }
+
+    private double getAngleA(Vec3d a, Vec3d b, Vec3d c, Vec3d dimension) {
+        Vec3d flattenedA = a.multiply(dimension);
+        Vec3d flattenedB = b.multiply(dimension);
+        Vec3d flattenedC = c.multiply(dimension);
+        double bc2 = flattenedB.squaredDistanceTo(flattenedC);
+        double ab2 = flattenedB.squaredDistanceTo(flattenedA);
+        double ac2 = flattenedC.squaredDistanceTo(flattenedA);
+        double cosCamera = (ab2 + ac2 - bc2) / (2 * Math.sqrt(ab2) * Math.sqrt(ac2));
+        double cameraAngle = Math.acos(cosCamera);
+        return Math.toDegrees(cameraAngle);
+    }
+
     public boolean setCameraAngle(float yaw, float pitch) {
-        if (!isShoulderSurfingEnabled()) return false;
+        if (!isShoulderSurfingEnabled())
+            return false;
         IShoulderSurfingCamera camera = ShoulderSurfing.getInstance().getCamera();
         camera.setYRot(yaw);
         camera.setXRot(pitch);

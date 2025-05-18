@@ -21,7 +21,7 @@ public class HudRenderEvent implements HudRenderCallback {
         MinecraftClient client = MinecraftClient.getInstance();
         ClientPlayerEntity player = client.player;
 
-        boolean bl1 = client.options.getPerspective().isFirstPerson() || AdditionalMods.shouderSurfing().isUsingCustomCamera();
+        boolean bl1 = client.options.getPerspective().isFirstPerson() || AdditionalMods.shoulderSurfing().isUsingCustomCamera();
         boolean bl2 = client.interactionManager.getCurrentGameMode() != GameMode.SPECTATOR;
         boolean bl3 = !client.inGameHud.getDebugHud().shouldShowDebugHud();
         boolean bl4 = showHUD;

@@ -31,7 +31,7 @@ public class Camera_lock_onClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         IEntityPickerAdapter entityPickerAdapter = new VanillaEntityPickerAdapter();
-        if (AdditionalMods.shouderSurfing().isInstalled()) {
+        if (AdditionalMods.shoulderSurfing().isInstalled()) {
             entityPickerAdapter = new ShoulderSurfingEntityPicker(entityPickerAdapter);
         }
         ClientTickEvents.END_CLIENT_TICK.register(new HudTickDeltaEvent());
