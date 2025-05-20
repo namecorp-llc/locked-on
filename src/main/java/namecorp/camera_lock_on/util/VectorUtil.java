@@ -133,37 +133,4 @@ public class VectorUtil {
     public static Vec3d flatXY(Vec3d vec) {
         return vec.multiply(planeXY);
     }
-
-    /*
-     * Calculate the distance between two points in 3D space, using the XZ plane to
-     * to flatten the points.
-     * @param a The first point.
-     * @param b The second point.
-     * @return The squared distance between the two points.
-    */
-    public static double squareDistanceXZ(Vec3d a, Vec3d b) {
-        return VectorUtil.flatXZ(a).squaredDistanceTo(VectorUtil.flatXZ(b));
-    }
-
-    /*
-     * Calculate the distance between two points in 3D space, using the YZ plane to
-     * to flatten the points.
-     * @param a The first point.
-     * @param b The second point.
-     * @return The squared distance between the two points.
-    */
-    public static double squareDistanceYZ(Vec3d a, Vec3d b) {
-        return VectorUtil.flatYZ(a).squaredDistanceTo(VectorUtil.flatYZ(b));
-    }
-
-    /*
-     * Calculate the distance between two points in 3D space, using the XY plane to
-     * to flatten the points.
-     * @param a The first point.
-     * @param b The second point.
-     * @return The squared distance between the two points.
-    */
-    public static double squareDistanceXY(Vec3d a, Vec3d b) {
-        return VectorUtil.flatXY(a).squaredDistanceTo(VectorUtil.flatXY(b));
-    }
 }

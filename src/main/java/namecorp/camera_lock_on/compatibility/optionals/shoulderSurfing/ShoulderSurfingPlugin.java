@@ -30,6 +30,7 @@ public class ShoulderSurfingPlugin implements ICameraCouplingCallback, IShoulder
     @Override
     public Vec3d post(IShoulderSurfing instance, Vec3d targetOffset, Vec3d defaultOffset) {
         ShoulderSurfingManager shoulderSurfing = AdditionalMods.shoulderSurfing();
+        shoulderSurfing.setOffset(defaultOffset);
         return lockedEntity != null && shoulderSurfing.mustIgnoreDisplacement()
             ? defaultOffset.multiply(0, 0, 1)
             : defaultOffset;
