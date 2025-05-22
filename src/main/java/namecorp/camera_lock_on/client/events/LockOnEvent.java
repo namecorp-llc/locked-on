@@ -20,47 +20,14 @@ public class LockOnEvent implements WorldRenderEvents.Last {
         MinecraftClient client = MinecraftClient.getInstance();
         ClientPlayerEntity player = client.player;
 
-        float tickDelta = worldRenderContext.tickCounter().getTickDelta(false);
-        
         if(player != null && client.world != null) {
             if(lockOnKeyBind.wasPressed()) {
-                HitResult hit = raycastCrosshair(client.cameraEntity, 500.0f, tickDelta);
+                HitResult hit = raycastCrosshair(client.cameraEntity, 500.0f, last.tickCounter().getTickDelta(true));
                 if(lockedEntity != null) {
                     lockedEntity = null;
                 } else {
                     if(hit instanceof EntityHitResult && ((EntityHitResult) hit).getEntity() instanceof LivingEntity) {
                         lockedEntity = (LivingEntity) ((EntityHitResult) hit).getEntity();
-                    } else {
-                        float currYaw = player.getYaw(tickDelta);
-                        float tempYaw = currYaw;
-                        float savedYaw = 999999;
-
-                        LivingEntity temp = null;
-
-                        for(int i = -20; i < 20; i++) {
-                            tempYaw = currYaw + Math.abs(i);
-                            player.setYaw(currYaw+i);
-                            HitResult hit1 = raycastCrosshair(client.cameraEntity, 500.0f, tickDelta);
-
-                            if(hit1 instanceof EntityHitResult && ((EntityHitResult) hit1).getEntity() instanceof LivingEntity) {
-                                LivingEntity newEntity = (LivingEntity) ((EntityHitResult) hit1).getEntity();
-                                if(temp == null) {
-                                    temp = (LivingEntity) ((EntityHitResult) hit1).getEntity();
-                                } else {
-                                    if(tempYaw < savedYaw) {
-                                        temp = newEntity;
-                                        savedYaw = tempYaw;
-                                    }
-                                }
-
-                            }
-                        }
-
-                        if(temp != null) {
-                            lockedEntity = temp;
-                        }
-
-                        player.setYaw(currYaw);
                     }
                 }
             }
@@ -85,6 +52,8 @@ public class LockOnEvent implements WorldRenderEvents.Last {
             if (lockedEntity != null) {
                 Vec3d targetPos = lockedEntity.getPos();
                 Vec3d playerPos = player.getPos();
+
+                float tickDelta = last.tickCounter().getTickDelta(true);
 
                 float lockedYaw;
                 float lockedPitch;
@@ -139,14 +108,6 @@ public class LockOnEvent implements WorldRenderEvents.Last {
 
                 if(player.input.jumping) {
                     pitchDelta = cameraDelta/5f;
-                }
-
-                if(client.getCurrentFps() > 200) {
-                    int i = client.getCurrentFps()/200;
-                    for(int j = 0; j < i; j++) {
-                        yawDelta = yawDelta/2;
-                        pitchDelta = pitchDelta/2;
-                    }
                 }
 
                 player.setYaw(MathHelper.lerp(yawDelta, currentYaw, lockedYaw));
