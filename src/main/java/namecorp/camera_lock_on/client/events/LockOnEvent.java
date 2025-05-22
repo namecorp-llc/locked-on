@@ -14,9 +14,9 @@ import net.minecraft.util.math.*;
 
 import static namecorp.camera_lock_on.client.Camera_lock_onClient.*;
 
-public class LockOnEvent implements WorldRenderEvents.Last {
+public class LockOnEvent implements WorldRenderEvents.Start {
     @Override
-    public void onLast(WorldRenderContext last) {
+    public void onStart(WorldRenderContext last) {
         MinecraftClient client = MinecraftClient.getInstance();
         ClientPlayerEntity player = client.player;
 
@@ -58,9 +58,6 @@ public class LockOnEvent implements WorldRenderEvents.Last {
                 float lockedYaw;
                 float lockedPitch;
 
-                float currentYaw = player.getYaw(tickDelta);
-                float currentPitch = player.getPitch(tickDelta);
-
                 double deltaX = Math.abs(targetPos.x - playerPos.x);
                 double deltaY = targetPos.y - playerPos.y;
                 double deltaZ = Math.abs(targetPos.z - playerPos.z);
@@ -92,26 +89,10 @@ public class LockOnEvent implements WorldRenderEvents.Last {
                     }
                 }
 
-
                 lockedPitch = (float) thetaDegreesXY - 90;
 
-                if (lockedYaw < currentYaw - 180f) {
-                    lockedYaw += 360f;
-                }
-
-                if (lockedYaw > currentYaw + 180f) {
-                    lockedYaw -= 360f;
-                }
-
-                float yawDelta = cameraDelta;
-                float pitchDelta = cameraDelta;
-
-                if(player.input.jumping) {
-                    pitchDelta = cameraDelta/5f;
-                }
-
-                player.setYaw(MathHelper.lerp(yawDelta, currentYaw, lockedYaw));
-                player.setPitch(MathHelper.lerp(pitchDelta, currentPitch, lockedPitch));
+                player.setYaw(MathHelper.lerpAngleDegrees(tickDelta, player.prevYaw, lockedYaw));
+                player.setPitch(MathHelper.lerpAngleDegrees(tickDelta, player.prevPitch, lockedPitch));
             }
         } else {
             lockedEntity = null;
