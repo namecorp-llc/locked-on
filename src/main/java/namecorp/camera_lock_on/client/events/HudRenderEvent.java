@@ -2,6 +2,7 @@ package namecorp.camera_lock_on.client.events;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import namecorp.camera_lock_on.Camera_lock_on;
+import namecorp.camera_lock_on.compatibility.optionals.AdditionalMods;
 import namecorp.camera_lock_on.util.LockOnUtil;
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 import net.minecraft.client.MinecraftClient;
@@ -9,8 +10,6 @@ import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.render.RenderTickCounter;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Items;
-import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.world.GameMode;
 
@@ -22,7 +21,7 @@ public class HudRenderEvent implements HudRenderCallback {
         MinecraftClient client = MinecraftClient.getInstance();
         ClientPlayerEntity player = client.player;
 
-        boolean bl1 = client.options.getPerspective().isFirstPerson();
+        boolean bl1 = client.options.getPerspective().isFirstPerson() || AdditionalMods.shoulderSurfing().isUsingCustomCamera();
         boolean bl2 = client.interactionManager.getCurrentGameMode() != GameMode.SPECTATOR;
         boolean bl3 = !client.inGameHud.getDebugHud().shouldShowDebugHud();
         boolean bl4 = showHUD;

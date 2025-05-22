@@ -1,8 +1,12 @@
 package namecorp.camera_lock_on.client;
 
+import namecorp.camera_lock_on.adapters.IEntityPickerAdapter;
+import namecorp.camera_lock_on.adapters.VanillaEntityPickerAdapter;
 import namecorp.camera_lock_on.client.events.HudRenderEvent;
 import namecorp.camera_lock_on.client.events.HudTickDeltaEvent;
 import namecorp.camera_lock_on.client.events.LockOnEvent;
+import namecorp.camera_lock_on.compatibility.optionals.AdditionalMods;
+import namecorp.camera_lock_on.compatibility.optionals.shoulderSurfing.ShoulderSurfingEntityPicker;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
@@ -26,8 +30,12 @@ public class Camera_lock_onClient implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
+        IEntityPickerAdapter entityPickerAdapter = new VanillaEntityPickerAdapter();
+        if (AdditionalMods.shoulderSurfing().isInstalled()) {
+            entityPickerAdapter = new ShoulderSurfingEntityPicker(entityPickerAdapter);
+        }
         ClientTickEvents.END_CLIENT_TICK.register(new HudTickDeltaEvent());
-        WorldRenderEvents.START.register(new LockOnEvent());
+        WorldRenderEvents.START.register(new LockOnEvent(entityPickerAdapter));
         HudRenderCallback.EVENT.register(new HudRenderEvent());
     }
 

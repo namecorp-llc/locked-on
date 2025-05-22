@@ -1,8 +1,9 @@
 package namecorp.camera_lock_on.mixin;
 
-import namecorp.camera_lock_on.client.LockedClient;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.Mouse;
+
+import static namecorp.camera_lock_on.client.Camera_lock_onClient.lockedEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -13,7 +14,7 @@ public class MouseMixin {
 
     @Inject(method = "updateMouse", at = @At("HEAD"), cancellable = true)
     private void updateMouse(CallbackInfo ci) {
-        if(LockedClient.lockedEntity != null && MinecraftClient.getInstance().currentScreen == null) {
+        if(lockedEntity != null && MinecraftClient.getInstance().currentScreen == null) {
             ci.cancel();
         }
     }

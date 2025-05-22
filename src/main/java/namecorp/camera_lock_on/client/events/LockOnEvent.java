@@ -4,17 +4,24 @@ import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.projectile.ProjectileUtil;
-import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.*;
 
 import static namecorp.camera_lock_on.client.Camera_lock_onClient.*;
 
+import namecorp.camera_lock_on.adapters.IEntityPickerAdapter;
+import namecorp.camera_lock_on.util.LockOnUtil;
+import namecorp.camera_lock_on.util.Rotation;
+
 public class LockOnEvent implements WorldRenderEvents.Start {
+
+    private IEntityPickerAdapter entityPickerAdapter;
+    public LockOnEvent(IEntityPickerAdapter entityPickerAdapter) {
+        this.entityPickerAdapter = entityPickerAdapter;
+    }
+
     @Override
     public void onStart(WorldRenderContext worldRenderContext) {
         MinecraftClient client = MinecraftClient.getInstance();
@@ -26,7 +33,7 @@ public class LockOnEvent implements WorldRenderEvents.Start {
 
         // Lock onto entity
         if(lockOnKeyBind.wasPressed()) {
-            HitResult hit = raycastCrosshair(client.cameraEntity, 500.0f, tickDelta);
+            HitResult hit = entityPickerAdapter.pick(500.0f, tickDelta);
             if(lockedEntity != null) {
                 lockedEntity = null;
             } else {
@@ -42,7 +49,7 @@ public class LockOnEvent implements WorldRenderEvents.Start {
                     for(int i = -20; i < 20; i++) {
                         tempYaw = currYaw + Math.abs(i);
                         player.setYaw(currYaw+i);
-                        HitResult hit1 = raycastCrosshair(client.cameraEntity, 500.0f, tickDelta);
+                        HitResult hit1 = entityPickerAdapter.pick(500.0f, tickDelta);
 
                         if(hit1 instanceof EntityHitResult && ((EntityHitResult) hit1).getEntity() instanceof LivingEntity) {
                             LivingEntity newEntity = (LivingEntity) ((EntityHitResult) hit1).getEntity();
@@ -86,50 +93,10 @@ public class LockOnEvent implements WorldRenderEvents.Start {
             }
         }
 
-        // Actual Math Here
-        Vec3d targetPos = lockedEntity.getPos();
-        Vec3d playerPos = player.getPos();
+        Rotation rotation = entityPickerAdapter.getRotation(player, lockedEntity, tickDelta);
 
-        float lockedYaw;
-        float lockedPitch;
-
-        double deltaX = Math.abs(targetPos.x - playerPos.x);
-        double deltaY = targetPos.y - playerPos.y;
-        double deltaZ = Math.abs(targetPos.z - playerPos.z);
-
-
-        if(lockedEntity.getHeight() < 1.5f) {
-            deltaY--;
-        } else if (lockedEntity.getHeight() < 2) {
-            deltaY -= 0.3f;
-        }
-
-
-        double thetaRadiansXY = Math.atan2(Math.sqrt(Math.pow(deltaX, 2) + Math.pow(deltaZ, 2)), deltaY);
-        double thetaDegreesXY = Math.toDegrees(thetaRadiansXY);
-
-        if(targetPos.z >= playerPos.z) {
-            double thetaRadiansXZ = Math.atan2(deltaX, deltaZ);
-            double thetaDegreesXZ = Math.toDegrees(thetaRadiansXZ);
-            if(targetPos.x >= playerPos.x) {
-                lockedYaw = (float) -thetaDegreesXZ;
-            } else {
-                lockedYaw = (float) thetaDegreesXZ;
-            }
-        } else {
-            double thetaRadiansXZ = Math.atan2(deltaZ, deltaX);
-            double thetaDegreesXZ = Math.toDegrees(thetaRadiansXZ);
-            if(targetPos.x >= playerPos.x) {
-                lockedYaw = (float) -thetaDegreesXZ - 90;
-            } else {
-                lockedYaw = (float) thetaDegreesXZ + 90;
-            }
-        }
-
-
-        lockedPitch = (float) thetaDegreesXY - 90;
-
-        player.setYaw(MathHelper.lerpAngleDegrees(tickDelta*cameraDelta, player.prevYaw, lockedYaw));
-        player.setPitch(MathHelper.lerpAngleDegrees(tickDelta*cameraDelta, player.prevPitch, lockedPitch));
+        float newYaw = MathHelper.lerpAngleDegrees(tickDelta*cameraDelta, rotation.getCurrentYaw(), rotation.getTargetYaw());
+        float newPitch = MathHelper.lerpAngleDegrees(tickDelta*cameraDelta, rotation.getCurrentPitch(), rotation.getTargetPitch());
+        entityPickerAdapter.LookAt(newYaw, newPitch);
     }
 }

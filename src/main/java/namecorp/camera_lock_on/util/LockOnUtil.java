@@ -1,15 +1,18 @@
 package namecorp.camera_lock_on.util;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.mob.WardenEntity;
-import net.minecraft.entity.passive.*;
+import net.minecraft.entity.projectile.ProjectileUtil;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
 import net.minecraft.item.SpawnEggItem;
-
-import java.util.HashMap;
-import java.util.Map;
+import net.minecraft.util.hit.BlockHitResult;
+import net.minecraft.util.hit.EntityHitResult;
+import net.minecraft.util.hit.HitResult;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Box;
+import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec3d;
 
 public class LockOnUtil {
     public static ItemStack getSpawnEgg(Entity entity) {
@@ -31,6 +34,7 @@ public class LockOnUtil {
             return hitResult;
         }
     }
+
     public static HitResult raycastCrosshair(Entity camera, double range, float tickDelta) {
         double d = range;
         double e = MathHelper.square(range);
