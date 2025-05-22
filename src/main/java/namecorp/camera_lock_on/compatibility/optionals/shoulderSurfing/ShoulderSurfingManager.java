@@ -28,11 +28,8 @@ public class ShoulderSurfingManager extends ModManager {
      * It has been empirically determined that this value works well
      */
     private static final int COMPENSATION_CONSTANT = 64;
-    private static final Vec2f xCompensationLimit = new Vec2f(-1f, 1f);
-    private static final Vec2f yCompensationLimit = new Vec2f(0, 1f);
     private final SingleCache<Vec3d, Vec2f> baseAngleCache = new SingleCache<>();
     private final SingleCachePair<Vec2f, Vec3d, Vec2f> offsetCache = new SingleCachePair<>();
-    private Vec3d baseOffset = Vec3d.ZERO;
 
 	public ShoulderSurfingManager() {
         super("shouldersurfing");
@@ -70,13 +67,12 @@ public class ShoulderSurfingManager extends ModManager {
         if (!isUsingCustomCamera() || mustIgnoreDisplacement()) return Vec2f.ZERO;
 
         Vec2f result = baseAngleCache.get(
-            baseOffset,
+            ShoulderSurfing.getInstance().getCamera().getOffset(),
             offset -> {
                 float xSign = offset.x > 0f ? -1f : 1f;
-                float ySign = offset.y > 0f ? 1f : -1f;
                 return new Vec2f(
-                    (float)(VectorUtil.angleXZ(baseOffset, Vec3d.ZERO, VectorUtil.flatX(baseOffset)) * COMPENSATION_CONSTANT * xSign),
-                    (float)(VectorUtil.angleYZ(baseOffset, Vec3d.ZERO, VectorUtil.flatY(baseOffset)) * COMPENSATION_CONSTANT * ySign)
+                    (float)(VectorUtil.angleXZ(offset, Vec3d.ZERO, VectorUtil.flatX(offset)) * COMPENSATION_CONSTANT * xSign),
+                    0f
                 );
             }
         );
@@ -86,13 +82,10 @@ public class ShoulderSurfingManager extends ModManager {
                 MinecraftClient.getInstance().gameRenderer.getCamera().getPos(),
                 cameraPosition -> {
                     Vec3d targetPos = target.getPos();
-                    double distanceToTargetX = cameraPosition.squaredDistanceTo(targetPos);
-                    double distanceToTargetY = cameraPosition.squaredDistanceTo(targetPos);
-                    Camera_lock_on.LOGGER.info("Distances: {}, {}", distanceToTargetX, distanceToTargetY);
-                    Camera_lock_on.LOGGER.info("Offset: {}, {}", result.x, result.y);
+                    double distanceToTargetX = cameraPosition.squaredDistanceTo(VectorUtil.flatXZ(targetPos));
                     return new Vec2f(
                         (float) (-result.x / distanceToTargetX),
-                        (float) (result.y / distanceToTargetY)
+                        0f
                     );
                 }
             );
@@ -101,11 +94,7 @@ public class ShoulderSurfingManager extends ModManager {
     public boolean mustIgnoreDisplacement() {
         IShoulderSurfing shoulderSurfing = ShoulderSurfing.getInstance();
         return Math.abs(shoulderSurfing.getCamera().getXRot()) > 45
-            || shoulderSurfing.isAiming()
-            || baseOffset.x < xCompensationLimit.x
-            || baseOffset.x > xCompensationLimit.y
-            || baseOffset.y < yCompensationLimit.x
-            || baseOffset.y > yCompensationLimit.y;
+            || shoulderSurfing.isAiming();
     }
 
     public boolean setCameraAngle(float yaw, float pitch) {
@@ -115,9 +104,5 @@ public class ShoulderSurfingManager extends ModManager {
         camera.setXRot(pitch);
         MinecraftClient.getInstance().player.setAngles(yaw, pitch);
         return true;
-    }
-
-    public void setOffset(Vec3d currentOffset) {
-        baseOffset = currentOffset;
     }
 }

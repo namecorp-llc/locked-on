@@ -15,6 +15,9 @@ import net.minecraft.util.math.Vec3d;
  * Compatibility class for the "Should Surfing" mod
  */
 public class ShoulderSurfingPlugin implements ICameraCouplingCallback, IShoulderSurfingPlugin, ITargetCameraOffsetCallback {
+    private static final double supportedX = 0.75;
+    private static final double supportedY = 0;
+
     @Override
     public boolean isForcingCameraCoupling(MinecraftClient mc) {
         return lockedEntity != null;
@@ -29,10 +32,9 @@ public class ShoulderSurfingPlugin implements ICameraCouplingCallback, IShoulder
 
     @Override
     public Vec3d post(IShoulderSurfing instance, Vec3d targetOffset, Vec3d defaultOffset) {
+        if (lockedEntity == null) return defaultOffset;
         ShoulderSurfingManager shoulderSurfing = AdditionalMods.shoulderSurfing();
-        shoulderSurfing.setOffset(defaultOffset);
-        return lockedEntity != null && shoulderSurfing.mustIgnoreDisplacement()
-            ? defaultOffset.multiply(0, 0, 1)
-            : defaultOffset;
+        if (shoulderSurfing.mustIgnoreDisplacement()) return defaultOffset.multiply(0, 0, 1);
+        return new Vec3d(defaultOffset.x > 0 ? supportedX : -supportedX, supportedY, defaultOffset.z);
     }
 }
