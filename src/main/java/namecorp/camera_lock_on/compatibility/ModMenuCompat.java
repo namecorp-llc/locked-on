@@ -24,9 +24,11 @@ public class ModMenuCompat implements ModMenuApi {
 
             general.addEntry(entryBuilder.startFloatField(
                             Text.translatable("option.lockon.camdelta"), Camera_lock_onClient.cameraDelta)
-                    .setDefaultValue(0.25f)
+                    .setDefaultValue(1)
                     .setTooltip(Text.translatable("option.lockon.camdeltatooltip"))
                     .setSaveConsumer(newValue -> Camera_lock_onClient.cameraDelta = newValue)
+                    .setMax(1)
+                    .setMin(0)
                     .build());
             general.addEntry(entryBuilder.startBooleanToggle(
                     Text.translatable("option.lockon.showHUD"), Camera_lock_onClient.showHUD)
