@@ -27,7 +27,7 @@ public class Camera_lock_onClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         ClientTickEvents.END_CLIENT_TICK.register(new HudTickDeltaEvent());
-        WorldRenderEvents.LAST.register(new LockOnEvent());
+        WorldRenderEvents.START.register(new LockOnEvent());
         HudRenderCallback.EVENT.register(new HudRenderEvent());
     }
 
