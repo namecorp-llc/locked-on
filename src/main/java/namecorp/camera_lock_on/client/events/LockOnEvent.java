@@ -15,7 +15,7 @@ import namecorp.camera_lock_on.adapters.IEntityPickerAdapter;
 import namecorp.camera_lock_on.util.LockOnUtil;
 import namecorp.camera_lock_on.util.Rotation;
 
-public class LockOnEvent implements WorldRenderEvents.Last {
+public class LockOnEvent implements WorldRenderEvents.Start {
 
     private IEntityPickerAdapter entityPickerAdapter;
     public LockOnEvent(IEntityPickerAdapter entityPickerAdapter) {
@@ -23,54 +23,80 @@ public class LockOnEvent implements WorldRenderEvents.Last {
     }
 
     @Override
-    public void onLast(WorldRenderContext last) {
+    public void onStart(WorldRenderContext worldRenderContext) {
         MinecraftClient client = MinecraftClient.getInstance();
         ClientPlayerEntity player = client.player;
 
-        if(player != null && client.world != null) {
-            if(lockOnKeyBind.wasPressed()) {
-                HitResult hit = entityPickerAdapter.pick(500.0f, last.tickCounter().getTickDelta(true));
-                if(lockedEntity != null) {
-                    lockedEntity = null;
-                } else {
-                    if(hit instanceof EntityHitResult && ((EntityHitResult) hit).getEntity() instanceof LivingEntity) {
-                        lockedEntity = (LivingEntity) ((EntityHitResult) hit).getEntity();
-                    }
-                }
-            }
+        if(player == null || client.world == null) { lockedEntity = null; return; }
 
+        float tickDelta = worldRenderContext.tickCounter().getTickDelta(false);
+
+        // Lock onto entity
+        if(lockOnKeyBind.wasPressed()) {
+            HitResult hit = entityPickerAdapter.pick(500.0f, tickDelta);
             if(lockedEntity != null) {
-                if(!lockedEntity.isAlive()) {
+                lockedEntity = null;
+            } else {
+                if(hit instanceof EntityHitResult && ((EntityHitResult) hit).getEntity() instanceof LivingEntity) {
+                    lockedEntity = (LivingEntity) ((EntityHitResult) hit).getEntity();
+                } else {
+                    float currYaw = player.getYaw(tickDelta);
+                    float tempYaw;
+                    float savedYaw = 999999;
+
+                    LivingEntity tempEntity = null;
+
+                    for(int i = -20; i < 20; i++) {
+                        tempYaw = currYaw + Math.abs(i);
+                        player.setYaw(currYaw+i);
+                        HitResult hit1 = entityPickerAdapter.pick(500.0f, tickDelta);
+
+                        if(hit1 instanceof EntityHitResult && ((EntityHitResult) hit1).getEntity() instanceof LivingEntity) {
+                            LivingEntity newEntity = (LivingEntity) ((EntityHitResult) hit1).getEntity();
+                            if(tempEntity == null) {
+                                tempEntity = (LivingEntity) ((EntityHitResult) hit1).getEntity();
+                            } else {
+                                if(tempYaw < savedYaw) {
+                                    tempEntity = newEntity;
+                                    savedYaw = tempYaw;
+                                }
+                            }
+
+                        }
+                    }
+
+                    if(tempEntity != null) {
+                        lockedEntity = tempEntity;
+                    }
+
+                    player.setYaw(currYaw);
+                }
+            }
+        }
+
+        // Stops code if no entity is currently locked on
+        if(lockedEntity == null) return;
+
+        // Lose locked entity if the player cannot see it for more than 3 seconds
+        if(!lockedEntity.isAlive()) {
+            lockedEntity = null;
+        } else {
+            if(!player.canSee(lockedEntity) && !player.hasPermissionLevel(2)) {
+                if(noSightTimer > 60) {
+                    noSightTimer = 0;
                     lockedEntity = null;
                 } else {
-                    if(!player.canSee(lockedEntity) && !player.hasPermissionLevel(2)) {
-                        if(noSightTimer > 60) {
-                            noSightTimer = 0;
-                            lockedEntity = null;
-                        } else {
-                            noSightTimer++;
-                        }
-                    } else {
-                        noSightTimer = 0;
-                    }
+                    noSightTimer++;
                 }
+            } else {
+                noSightTimer = 0;
             }
-
-            if (lockedEntity != null) {
-                Rotation rotation = entityPickerAdapter.getRotation(player, lockedEntity, last);
-                float yawDelta = cameraDelta;
-                float pitchDelta = cameraDelta;
-
-                if(player.input.jumping) {
-                    pitchDelta = cameraDelta/5f;
-                }
-
-                float newYaw = MathHelper.lerp(yawDelta, rotation.getCurrentYaw(), rotation.getTargetYaw());
-                float newPitch = MathHelper.lerp(pitchDelta, rotation.getCurrentPitch(), rotation.getTargetPitch());
-                entityPickerAdapter.LookAt(newYaw, newPitch);
-            }
-        } else {
-            lockedEntity = null;
         }
+
+        Rotation rotation = entityPickerAdapter.getRotation(player, lockedEntity, tickDelta);
+
+        float newYaw = MathHelper.lerpAngleDegrees(tickDelta*cameraDelta, rotation.getCurrentYaw(), rotation.getTargetYaw());
+        float newPitch = MathHelper.lerpAngleDegrees(tickDelta*cameraDelta, rotation.getCurrentPitch(), rotation.getTargetPitch());
+        entityPickerAdapter.LookAt(newYaw, newPitch);
     }
 }

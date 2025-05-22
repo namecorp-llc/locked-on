@@ -5,7 +5,6 @@ import org.jetbrains.annotations.Nullable;
 import namecorp.camera_lock_on.adapters.IEntityPickerAdapter;
 import namecorp.camera_lock_on.compatibility.optionals.AdditionalMods;
 import namecorp.camera_lock_on.util.Rotation;
-import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.hit.HitResult;
@@ -26,8 +25,8 @@ public class ShoulderSurfingEntityPicker implements IEntityPickerAdapter {
     }
 
     @Override
-    public Rotation getRotation(ClientPlayerEntity player, Entity lockedEntity, WorldRenderContext last) {
-        Rotation rotation = vanillaEntityPickerAdapter.getRotation(player, lockedEntity, last);
+    public Rotation getRotation(ClientPlayerEntity player, Entity lockedEntity, float tickDelta) {
+        Rotation rotation = vanillaEntityPickerAdapter.getRotation(player, lockedEntity, tickDelta);
         rotation.addOffset(AdditionalMods.shoulderSurfing().getCameraAngleOffset(lockedEntity));
         return rotation;
     }

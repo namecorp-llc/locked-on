@@ -8,7 +8,6 @@ import com.github.exopandora.shouldersurfing.api.client.IShoulderSurfingCamera;
 import com.github.exopandora.shouldersurfing.api.client.ShoulderSurfing;
 import com.github.exopandora.shouldersurfing.api.model.PickContext;
 
-import namecorp.camera_lock_on.Camera_lock_on;
 import namecorp.camera_lock_on.compatibility.optionals.ModManager;
 import namecorp.camera_lock_on.util.VectorUtil;
 import namecorp.camera_lock_on.util.SingleCache;
@@ -35,27 +34,21 @@ public class ShoulderSurfingManager extends ModManager {
         super("shouldersurfing");
     }
 
-    public boolean isShoulderSurfingEnabled() {
-        return isInstalled();
-    }
-
     public Boolean isUsingCustomCamera() {
-        var shoulderSurfing = ShoulderSurfing.getInstance();
         return isInstalled()
-                && !MinecraftClient.getInstance().options.getPerspective().isFirstPerson()
-                && shoulderSurfing.isShoulderSurfing();
+            && !MinecraftClient.getInstance().options.getPerspective().isFirstPerson()
+            && ShoulderSurfing.getInstance().isShoulderSurfing();
     }
 
     @Nullable
     public IObjectPicker getEntityPicker() {
-        if (!isShoulderSurfingEnabled()) return null;
+        if (!isInstalled()) return null;
         return ShoulderSurfing.getInstance().getObjectPicker();
     }
 
     @Nullable
     public HitResult pick(double interactionRange, float tickDelta) {
-        if (!isShoulderSurfingEnabled())
-            return null;
+        if (!isInstalled()) return null;
         Camera camera = MinecraftClient.getInstance().gameRenderer.getCamera();
         PickContext pickContext = new PickContext.Builder(camera).build();
         return ShoulderSurfing.getInstance().getObjectPicker().pick(pickContext, interactionRange, tickDelta,
@@ -98,7 +91,7 @@ public class ShoulderSurfingManager extends ModManager {
     }
 
     public boolean setCameraAngle(float yaw, float pitch) {
-        if (!isShoulderSurfingEnabled()) return false;
+        if (!isInstalled()) return false;
         IShoulderSurfingCamera camera = ShoulderSurfing.getInstance().getCamera();
         camera.setYRot(yaw);
         camera.setXRot(pitch);

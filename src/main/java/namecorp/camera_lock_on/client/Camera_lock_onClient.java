@@ -35,7 +35,7 @@ public class Camera_lock_onClient implements ClientModInitializer {
             entityPickerAdapter = new ShoulderSurfingEntityPicker(entityPickerAdapter);
         }
         ClientTickEvents.END_CLIENT_TICK.register(new HudTickDeltaEvent());
-        WorldRenderEvents.LAST.register(new LockOnEvent(entityPickerAdapter));
+        WorldRenderEvents.START.register(new LockOnEvent(entityPickerAdapter));
         HudRenderCallback.EVENT.register(new HudRenderEvent());
     }
 
